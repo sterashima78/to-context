@@ -2,8 +2,7 @@
 .
 └── src
     ├── a.ts
-    ├── b.ts
-    └── c.ts
+    └── b.ts
 ```
 ### src/a.ts
 
@@ -18,11 +17,5 @@ export function fetchData() { return b(); }
 ```ts
 import c from './c'
 export default function b() { return c(); }
-
-```
-### src/c.ts
-
-```ts
-export default function c() { return 1; }
 
 ```

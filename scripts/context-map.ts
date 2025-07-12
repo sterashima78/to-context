@@ -13,10 +13,12 @@ program
   .option("-o, --output <type>", "markdown|json", "markdown")
   .option("-m, --max-lines <n>", "0 で無制限", "0")
   .option("-r, --root <dir>", "検索ルート", "src")
+  .option("-d, --depth <n>", "依存の深さ (0 は無制限)", "0")
   .option("-a, --all", "全ての候補ファイルを選択", false)
   .action(async (kw, opts) => {
     const rootDir = path.resolve(process.cwd(), opts.root);
     const maxLines = parseInt(opts.maxLines, 10);
+    const depth = parseInt(opts.depth, 10);
     const files = await collectFiles(rootDir);
     const matches = await searchFiles(files, kw, opts.literal);
     if (matches.length === 0) {
@@ -39,7 +41,7 @@ program
       process.exitCode = 1;
       return;
     }
-    const closure = await buildClosure(selected);
+    const closure = await buildClosure(selected, depth > 0 ? depth : Infinity);
     await outputFiles([...closure], opts.output, maxLines);
   });
 
@@ -134,20 +136,21 @@ async function resolveModule(baseFile: string, spec: string): Promise<string | n
   return null;
 }
 
-async function buildClosure(entries: string[]): Promise<Set<string>> {
+async function buildClosure(entries: string[], maxDepth: number): Promise<Set<string>> {
   const graph = new DirectedGraph();
   const visited = new Set<string>();
-  const queue = [...entries];
+  const queue: Array<{file: string; depth: number}> = entries.map((f) => ({ file: f, depth: 0 }));
   while (queue.length) {
-    const f = queue.shift()!;
+    const { file: f, depth } = queue.shift()!;
     if (visited.has(f)) continue;
     visited.add(f);
     if (!graph.hasNode(f)) graph.addNode(f);
+    if (depth >= maxDepth) continue;
     const deps = await parseImports(f);
     for (const d of deps) {
       if (!graph.hasNode(d)) graph.addNode(d);
       if (!graph.hasEdge(f, d)) graph.addEdge(f, d);
-      if (!visited.has(d)) queue.push(d);
+      if (!visited.has(d)) queue.push({ file: d, depth: depth + 1 });
     }
   }
   return new Set(graph.nodes());
