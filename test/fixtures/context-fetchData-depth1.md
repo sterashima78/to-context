@@ -1,10 +1,10 @@
 ```text
 .
-└── src
+└── examples
     ├── a.ts
     └── b.ts
 ```
-### src/a.ts
+### examples/a.ts
 
 ```ts
 import b from './b'
@@ -12,7 +12,7 @@ export const foo = "bar";
 export function fetchData() { return b(); }
 
 ```
-### src/b.ts
+### examples/b.ts
 
 ```ts
 import c from './c'
