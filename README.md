@@ -19,6 +19,9 @@ npm run context "ユーザーID" -- --literal -m 120 -o markdown
 
 # JSON list of files
 npm run context handleError -- -o json > files.json
+
+# Skip interactive prompt and accept all candidates
+npm run context fetchData -- --all
 ```
 
 Requires Node.js 18 or newer.
