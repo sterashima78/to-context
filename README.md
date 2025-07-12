@@ -8,6 +8,12 @@ CLI tool to generate context for LLMs by searching a codebase and resolving impo
 npm install
 ```
 
+Lint with [Oxlint](https://github.com/oxc-project/oxc):
+
+```bash
+npm run lint
+```
+
 ## Usage
 
 ```bash
