@@ -14,6 +14,7 @@ program
   .option("-m, --max-lines <n>", "0 で無制限", "0")
   .option("-r, --root <dir>", "検索ルート", "src")
   .option("-d, --depth <n>", "依存の深さ (0 は無制限)", "0")
+  .option("-u, --upstream", "初期ファイルを依存に持つファイル群も含める", false)
   .option("-a, --all", "全ての候補ファイルを選択", false)
   .action(async (kw, opts) => {
     const rootDir = path.resolve(process.cwd(), opts.root);
@@ -42,7 +43,12 @@ program
       process.exitCode = 1;
       return;
     }
-    const closure = await buildClosure(graph, selected, depth > 0 ? depth : Infinity);
+    let entries: string[] = selected;
+    if (opts.upstream) {
+      const parents = findDependents(graph, selected);
+      entries = [...new Set([...selected, ...parents])];
+    }
+    const closure = await buildClosure(graph, entries, depth > 0 ? depth : Infinity);
     await outputFiles([...closure], opts.output, maxLines);
   });
 
@@ -147,6 +153,24 @@ async function resolveModule(baseFile: string, spec: string): Promise<string | n
     }
   }
   return null;
+}
+
+function findDependents(graph: DirectedGraph, entries: string[]): Set<string> {
+  const visited = new Set<string>();
+  const queue = [...entries];
+  while (queue.length) {
+    const f = queue.shift()!;
+    if (visited.has(f)) continue;
+    visited.add(f);
+    const parents = graph.inNeighbors(f) || [];
+    for (const p of parents) {
+      if (!visited.has(p)) queue.push(p);
+    }
+  }
+  for (const e of entries) {
+    visited.delete(e);
+  }
+  return visited;
 }
 
 async function buildClosure(graph: DirectedGraph, entries: string[], maxDepth: number): Promise<Set<string>> {

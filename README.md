@@ -31,6 +31,8 @@ npm run context fetchData -- --all
 
 # Limit dependency depth to 2
 npm run context fetchData -- --depth 2
+# Include files that depend on the entry files
+npm run context uniqueB -- --upstream -a -o markdown
 ```
 
 Requires Node.js 18 or newer.
