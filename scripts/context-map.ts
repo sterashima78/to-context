@@ -20,7 +20,8 @@ program
     const maxLines = parseInt(opts.maxLines, 10);
     const depth = parseInt(opts.depth, 10);
     const files = await collectFiles(rootDir);
-    const matches = await searchFiles(files, kw, opts.literal);
+    const graph = new DirectedGraph();
+    const matches = await searchFiles(files, kw, opts.literal, graph);
     if (matches.length === 0) {
       console.error("No matches found");
       process.exitCode = 1;
@@ -41,7 +42,7 @@ program
       process.exitCode = 1;
       return;
     }
-    const closure = await buildClosure(selected, depth > 0 ? depth : Infinity);
+    const closure = await buildClosure(graph, selected, depth > 0 ? depth : Infinity);
     await outputFiles([...closure], opts.output, maxLines);
   });
 
@@ -77,10 +78,18 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function searchFiles(files: string[], kw: string, literal: boolean): Promise<MatchInfo[]> {
+async function searchFiles(files: string[], kw: string, literal: boolean, graph?: DirectedGraph): Promise<MatchInfo[]> {
   const res: MatchInfo[] = [];
   for (const f of files) {
     const content = await fs.readFile(f, "utf8");
+    if (graph) {
+      if (!graph.hasNode(f)) graph.addNode(f);
+      const deps = await parseImportsFromContent(f, content);
+      for (const d of deps) {
+        if (!graph.hasNode(d)) graph.addNode(d);
+        if (!graph.hasEdge(f, d)) graph.addEdge(f, d);
+      }
+    }
     const lang = guessLang(f);
     const root = parse(lang, content);
     const rule = literal
@@ -98,8 +107,7 @@ async function searchFiles(files: string[], kw: string, literal: boolean): Promi
   return res;
 }
 
-async function parseImports(file: string): Promise<string[]> {
-  const content = await fs.readFile(file, "utf8");
+async function parseImportsFromContent(file: string, content: string): Promise<string[]> {
   const regexes = [
     /import[^'"\n]*['"]([^'"]+)['"]/g,
     /require\(\s*['"]([^'"]+)['"]\s*\)/g,
@@ -116,6 +124,11 @@ async function parseImports(file: string): Promise<string[]> {
     }
   }
   return [...deps];
+}
+
+async function parseImports(file: string): Promise<string[]> {
+  const content = await fs.readFile(file, "utf8");
+  return parseImportsFromContent(file, content);
 }
 
 async function resolveModule(baseFile: string, spec: string): Promise<string | null> {
@@ -136,24 +149,20 @@ async function resolveModule(baseFile: string, spec: string): Promise<string | n
   return null;
 }
 
-async function buildClosure(entries: string[], maxDepth: number): Promise<Set<string>> {
-  const graph = new DirectedGraph();
+async function buildClosure(graph: DirectedGraph, entries: string[], maxDepth: number): Promise<Set<string>> {
   const visited = new Set<string>();
-  const queue: Array<{file: string; depth: number}> = entries.map((f) => ({ file: f, depth: 0 }));
+  const queue: Array<{ file: string; depth: number }> = entries.map((f) => ({ file: f, depth: 0 }));
   while (queue.length) {
     const { file: f, depth } = queue.shift()!;
     if (visited.has(f)) continue;
     visited.add(f);
-    if (!graph.hasNode(f)) graph.addNode(f);
     if (depth >= maxDepth) continue;
-    const deps = await parseImports(f);
+    const deps = graph.outNeighbors(f) || [];
     for (const d of deps) {
-      if (!graph.hasNode(d)) graph.addNode(d);
-      if (!graph.hasEdge(f, d)) graph.addEdge(f, d);
       if (!visited.has(d)) queue.push({ file: d, depth: depth + 1 });
     }
   }
-  return new Set(graph.nodes());
+  return visited;
 }
 
 async function outputFiles(files: string[], format: string, maxLines: number) {
