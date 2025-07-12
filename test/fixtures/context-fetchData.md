@@ -1,3 +1,9 @@
+```text
+.
+└── src
+    ├── a.ts
+    └── b.ts
+```
 ### src/a.ts
 
 ```ts
