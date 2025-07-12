@@ -12,7 +12,7 @@ const execFileP = promisify(execFile);
 test('context-map fetchData snapshot', async () => {
   const { stdout } = await execFileP(
     'npx',
-    ['tsx', 'scripts/context-map.ts', 'fetchData', '-r', 'src', '-a', '-o', 'markdown'],
+    ['tsx', 'scripts/context-map.ts', 'fetchData', '-r', 'examples', '-a', '-o', 'markdown'],
     { encoding: 'utf8' }
   );
   const expected = await readFile(resolve(__dirname, 'fixtures', 'context-fetchData.md'), 'utf8');
@@ -22,7 +22,7 @@ test('context-map fetchData snapshot', async () => {
 test('context-map depth 1', async () => {
   const { stdout } = await execFileP(
     'npx',
-    ['tsx', 'scripts/context-map.ts', 'fetchData', '-r', 'src', '-a', '-o', 'markdown', '--depth', '1'],
+    ['tsx', 'scripts/context-map.ts', 'fetchData', '-r', 'examples', '-a', '-o', 'markdown', '--depth', '1'],
     { encoding: 'utf8' }
   );
   const expected = await readFile(resolve(__dirname, 'fixtures', 'context-fetchData-depth1.md'), 'utf8');
@@ -32,7 +32,7 @@ test('context-map depth 1', async () => {
 test('context-map upstream', async () => {
   const { stdout } = await execFileP(
     'npx',
-    ['tsx', 'scripts/context-map.ts', 'uniqueB', '-r', 'src', '-a', '-o', 'markdown', '--upstream'],
+    ['tsx', 'scripts/context-map.ts', 'uniqueB', '-r', 'examples', '-a', '-o', 'markdown', '--upstream'],
     { encoding: 'utf8' }
   );
   const expected = await readFile(resolve(__dirname, 'fixtures', 'context-uniqueB-upstream.md'), 'utf8');
