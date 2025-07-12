@@ -1,1 +1,2 @@
-export default function b() { return 42; }
+import c from './c'
+export default function b() { return c(); }

@@ -28,6 +28,9 @@ npm run context handleError -- -o json > files.json
 
 # Skip interactive prompt and accept all candidates
 npm run context fetchData -- --all
+
+# Limit dependency depth to 2
+npm run context fetchData -- --depth 2
 ```
 
 Requires Node.js 18 or newer.

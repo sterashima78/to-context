@@ -18,3 +18,13 @@ test('context-map fetchData snapshot', async () => {
   const expected = await readFile(resolve(__dirname, 'fixtures', 'context-fetchData.md'), 'utf8');
   assert.strictEqual(stdout, expected);
 });
+
+test('context-map depth 1', async () => {
+  const { stdout } = await execFileP(
+    'npx',
+    ['tsx', 'scripts/context-map.ts', 'fetchData', '-r', 'src', '-a', '-o', 'markdown', '--depth', '1'],
+    { encoding: 'utf8' }
+  );
+  const expected = await readFile(resolve(__dirname, 'fixtures', 'context-fetchData-depth1.md'), 'utf8');
+  assert.strictEqual(stdout, expected);
+});
