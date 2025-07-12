@@ -13,6 +13,7 @@ program
   .option("-o, --output <type>", "markdown|json", "markdown")
   .option("-m, --max-lines <n>", "0 で無制限", "0")
   .option("-r, --root <dir>", "検索ルート", "src")
+  .option("-a, --all", "全ての候補ファイルを選択", false)
   .action(async (kw, opts) => {
     const rootDir = path.resolve(process.cwd(), opts.root);
     const maxLines = parseInt(opts.maxLines, 10);
@@ -23,12 +24,16 @@ program
       process.exitCode = 1;
       return;
     }
-    const { selected } = await inquirer.prompt({
-      type: "checkbox",
-      name: "selected",
-      message: "Select entry files",
-      choices: matches.map((m) => ({ name: `${m.file} (${m.lines.join(",")})`, value: m.file })),
-    });
+    const selected = opts.all
+      ? matches.map((m) => m.file)
+      : (
+          await inquirer.prompt({
+            type: "checkbox",
+            name: "selected",
+            message: "Select entry files",
+            choices: matches.map((m) => ({ name: `${m.file} (${m.lines.join(",")})`, value: m.file })),
+          })
+        ).selected;
     if (!selected || selected.length === 0) {
       console.error("No files selected");
       process.exitCode = 1;
