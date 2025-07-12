@@ -1,0 +1,32 @@
+{
+  "name": "to-context",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "context": "tsx scripts/context-map.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint scripts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ast-grep/napi": "^0.38.7",
+    "commander": "^14.0.0",
+    "graphology": "^0.26.0",
+    "inquirer": "^12.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^9.31.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
