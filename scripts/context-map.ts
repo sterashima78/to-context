@@ -158,6 +158,8 @@ async function outputFiles(files: string[], format: string, maxLines: number) {
     console.log(JSON.stringify(files, null, 2));
     return;
   }
+  const rels = files.map((f) => path.relative(process.cwd(), f)).sort();
+  console.log("```text\n" + generateFileTree(rels) + "\n```");
   for (const f of files) {
     const content = await fs.readFile(f, "utf8");
     const lines = content.split(/\r?\n/);
@@ -165,5 +167,29 @@ async function outputFiles(files: string[], format: string, maxLines: number) {
     const rel = path.relative(process.cwd(), f);
     console.log(`### ${rel}\n\n\`\`\`ts\n${slice.join("\n")}\n\`\`\``);
   }
+}
+
+function generateFileTree(paths: string[]): string {
+  const root: Record<string, any> = {};
+  for (const p of paths) {
+    const parts = p.split(path.sep);
+    let node = root;
+    for (const part of parts) {
+      node[part] = node[part] || {};
+      node = node[part];
+    }
+  }
+  const lines = ["."];
+  const traverse = (node: Record<string, any>, prefix: string) => {
+    const entries = Object.keys(node).sort();
+    for (let i = 0; i < entries.length; i++) {
+      const name = entries[i];
+      const last = i === entries.length - 1;
+      lines.push(prefix + (last ? "└── " : "├── ") + name);
+      traverse(node[name], prefix + (last ? "    " : "│   "));
+    }
+  };
+  traverse(root, "");
+  return lines.join("\n");
 }
 
