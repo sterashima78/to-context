@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "context": "tsx scripts/context-map.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "lint": "oxlint scripts"
   },
   "keywords": [],
