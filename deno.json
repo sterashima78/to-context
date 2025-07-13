@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "context": "deno run --allow-read scripts/context-map.ts",
+    "test": "deno test --allow-run --allow-read",
+    "build": "deno compile --allow-read -o context-map scripts/context-map.ts"
+  },
+  "compilerOptions": {
+    "target": "ES2020"
+  }
+}
