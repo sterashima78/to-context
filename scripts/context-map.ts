@@ -223,13 +223,16 @@ async function outputFiles(files: string[], format: string, maxLines: number) {
     return;
   }
   const rels = files.map((f) => relative(Deno.cwd(), f)).sort();
-  console.log("```text\n" + generateFileTree(rels) + "\n```");
-  for (const f of files) {
+  console.log("```text\n" + generateFileTree(rels) + "\n```\n");
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
     const content = await Deno.readTextFile(f);
     const lines = content.split(/\r?\n/);
     const slice = maxLines > 0 ? lines.slice(0, maxLines) : lines;
     const rel = relative(Deno.cwd(), f);
-    console.log(`### ${rel}\n\n\`\`\`ts\n${slice.join("\n")}\n\`\`\``);
+    const snippet = slice.join("\n").replace(/\n$/, "");
+    const trailing = i === files.length - 1 ? "" : "\n";
+    console.log(`### ${rel}\n\n\`\`\`ts\n${snippet}\n\`\`\`${trailing}`);
   }
 }
 
