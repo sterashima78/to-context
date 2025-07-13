@@ -2,7 +2,9 @@
   "tasks": {
     "context": "deno run --allow-read scripts/context-map.ts",
     "test": "deno test --allow-run --allow-read",
-    "build": "deno compile --allow-read -o context-map scripts/context-map.ts"
+    "build": "deno compile --allow-read -o context-map scripts/context-map.ts",
+    "lint": "deno lint",
+    "format": "deno fmt"
   },
   "compilerOptions": {
     "target": "ES2020"

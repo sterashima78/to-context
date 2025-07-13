@@ -7,6 +7,18 @@ import dependencies.
 
 Install [Deno](https://deno.land/).
 
+Lint with `deno lint`:
+
+```bash
+deno task lint
+```
+
+Format with `deno fmt`:
+
+```bash
+deno task format
+```
+
 ## Usage
 
 ```bash

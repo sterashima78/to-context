@@ -195,11 +195,11 @@ function findDependents(graph: DirectedGraph, entries: string[]): Set<string> {
   return visited;
 }
 
-async function buildClosure(
+function buildClosure(
   graph: DirectedGraph,
   entries: string[],
   maxDepth: number,
-): Promise<Set<string>> {
+): Set<string> {
   const visited = new Set<string>();
   const queue: Array<{ file: string; depth: number }> = entries.map((f) => ({
     file: f,
@@ -233,8 +233,12 @@ async function outputFiles(files: string[], format: string, maxLines: number) {
   }
 }
 
+interface Tree {
+  [key: string]: Tree;
+}
+
 function generateFileTree(paths: string[]): string {
-  const root: Record<string, any> = {};
+  const root: Tree = {};
   for (const p of paths) {
     const parts = p.split("/");
     let node = root;
@@ -244,7 +248,7 @@ function generateFileTree(paths: string[]): string {
     }
   }
   const lines = ["."];
-  const traverse = (node: Record<string, any>, prefix: string) => {
+  const traverse = (node: Tree, prefix: string) => {
     const entries = Object.keys(node).sort();
     for (let i = 0; i < entries.length; i++) {
       const name = entries[i];
@@ -306,7 +310,7 @@ async function main() {
     const parents = findDependents(graph, selected);
     entries = [...new Set([...selected, ...parents])];
   }
-  const closure = await buildClosure(
+  const closure = buildClosure(
     graph,
     entries,
     opts.depth > 0 ? opts.depth : Infinity,
